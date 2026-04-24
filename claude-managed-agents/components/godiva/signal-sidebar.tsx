@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Zap, MousePointer, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { Mail, Zap, MousePointer, Sparkles, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { useGodiva } from "@/components/godiva/godiva-context";
 import { ManualInjectPanel } from "@/components/godiva/manual-inject-panel";
 import { SeverityBadge, SignalCountBadge } from "@/components/godiva/severity-badge";
@@ -224,16 +225,7 @@ export function SignalSidebar() {
                 return (
                   <div style={{ marginTop: 8 }}>
                     {isReady ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 5,
-                          fontSize: 11,
-                          color: "#4caf72",
-                          fontWeight: 500,
-                        }}
-                      >
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#4caf72", fontWeight: 500 }}>
                         <CheckCircle2 className="size-3" />
                         Analysis ready
                       </div>
@@ -269,6 +261,24 @@ export function SignalSidebar() {
                         )}
                         {isAnalyzing ? "Analyzing…" : hasError ? "Retry analysis" : "Analyze with AI"}
                       </button>
+                    )}
+                    {state.agentSessionId && (isAnalyzing || isReady) && (
+                      <Link
+                        href={`/chat/${state.agentSessionId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          marginTop: 5,
+                          fontSize: 10,
+                          color: "var(--gv-tx3)",
+                          textDecoration: "none",
+                        }}
+                      >
+                        <ExternalLink className="size-3" />
+                        View agent session
+                      </Link>
                     )}
                     {hasError && !isAnalyzing && (
                       <div style={{ fontSize: 10, color: "#e07b3a", marginTop: 4 }}>
