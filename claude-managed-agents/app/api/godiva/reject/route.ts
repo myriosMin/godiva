@@ -58,6 +58,8 @@ export async function POST(request: Request) {
   try {
     await messageHook.resume(`msg:${sessionId}`, { text });
   } catch (err) {
+    // HookNotFoundError means the workflow already ended — expected & benign.
+    // Anything else is a real failure we want visible in prod logs.
     if (!HookNotFoundError.is(err)) {
       console.warn(`[reject] messageHook.resume failed: ${String(err)}`);
     }

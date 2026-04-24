@@ -14,6 +14,11 @@ import type {
 const MAX_POLLS_PER_TURN = 200;
 const POLL_INTERVAL = "3s";
 
+// Trace logging for the polling workflow. Noisy by design — every poll
+// emits multiple lines — so gate on GODIVA_DEBUG=1.
+const debug: (msg: string) => void =
+  process.env.GODIVA_DEBUG === "1" ? (m) => console.log(m) : () => {};
+
 export type SessionEvent = {
   id: string;
   type: string;
@@ -28,12 +33,12 @@ async function sendMessage(
   text: string,
 ): Promise<void> {
   "use step";
-  console.log(`[sendMessage] session=${anthropicSessionId} text=${text.slice(0, 60)}`);
+  debug(`[sendMessage] session=${anthropicSessionId} text=${text.slice(0, 60)}`);
   const client = getAnthropic();
   await client.beta.sessions.events.send(anthropicSessionId, {
     events: [{ type: "user.message", content: [{ type: "text", text }] }],
   });
-  console.log(`[sendMessage] DONE`);
+  debug(`[sendMessage] DONE`);
 }
 
 type SerializableToolCall = {
@@ -67,7 +72,7 @@ async function executeToolsAndRespond(input: {
             },
           ],
         });
-        console.log(`[executeToolsAndRespond] allowed builtin tool=${tc.name}`);
+        debug(`[executeToolsAndRespond] allowed builtin tool=${tc.name}`);
         continue;
       }
 
@@ -101,7 +106,7 @@ async function executeToolsAndRespond(input: {
 
           resultText =
             "Recommendation submitted to the Godiva dashboard. Approvers have been notified. Stay available for operator follow-up questions.";
-          console.log(
+          debug(
             `[executeToolsAndRespond] submit_recommendation persisted for session=${input.internalSessionId}`,
           );
         } else if (tc.name === "check_vendor_status") {
@@ -152,7 +157,7 @@ async function executeToolsAndRespond(input: {
           },
         ],
       });
-      console.log(
+      debug(
         `[executeToolsAndRespond] sent result for ${tc.name} id=${tc.id} error=${isError}`,
       );
     }
@@ -176,7 +181,7 @@ async function pollAndStream(input: {
   lastEventId: string | null;
 }): Promise<PollResult> {
   "use step";
-  console.log(
+  debug(
     `[pollAndStream] START session=${input.anthropicSessionId} lastEventId=${input.lastEventId}`,
   );
 
@@ -197,7 +202,7 @@ async function pollAndStream(input: {
       { limit: 100 },
     );
 
-    console.log(`[pollAndStream] fetched ${page.data.length} events`);
+    debug(`[pollAndStream] fetched ${page.data.length} events`);
 
     let seenLast = input.lastEventId === null;
     for (const event of page.data) {
@@ -271,7 +276,7 @@ async function pollAndStream(input: {
     writer.releaseLock();
   }
 
-  console.log(
+  debug(
     `[pollAndStream] DONE wrote=${written} lastId=${lastId} done=${done} requiresAction=${requiresAction} pendingIds=${pendingToolCallIds.length}`,
   );
   return {
@@ -312,7 +317,7 @@ async function processTurn(
     for (const tc of result.newBuiltinToolCalls) builtinToolCallMap.set(tc.id, tc);
 
     if (result.done) {
-      console.log(`[processTurn] turn complete after ${i + 1} polls`);
+      debug(`[processTurn] turn complete after ${i + 1} polls`);
       break;
     }
 
@@ -345,7 +350,7 @@ export async function sessionWorkflow(input: {
   initialMessage: string;
 }) {
   "use workflow";
-  console.log(
+  debug(
     `[sessionWorkflow] START internal=${input.internalSessionId} anthropic=${input.anthropicSessionId}`,
   );
 
@@ -363,7 +368,7 @@ export async function sessionWorkflow(input: {
   });
 
   for await (const { text } of hook) {
-    console.log(`[sessionWorkflow] received message: ${text.slice(0, 60)}`);
+    debug(`[sessionWorkflow] received message: ${text.slice(0, 60)}`);
     lastEventId = await processTurn(
       input.anthropicSessionId,
       input.internalSessionId,
