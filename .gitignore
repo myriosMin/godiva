@@ -1,3 +1,6 @@
 raw_docs/
 .DS_Store
-claude-managed-agents/
+.next/
+claude-managed-agents/node_modules/
+claude-managed-agents/.next/
+claude-managed-agents/.env*
