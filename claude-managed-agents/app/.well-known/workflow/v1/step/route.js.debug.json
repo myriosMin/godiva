@@ -1,5 +1,10 @@
 {
-  "stepFiles": [],
-  "workflowFiles": [],
+  "stepFiles": [
+    "/Users/myrios/Downloads/devfolio/claude-managed-agents/app/workflows/tail-session.ts",
+    "/Users/myrios/Downloads/devfolio/claude-managed-agents/node_modules/.pnpm/workflow@4.2.0_@nestjs+common@11.1.18_reflect-metadata@0.2.2_rxjs@7.8.2__@nestjs+core@1_56944d4568268a90e668e31941a77344/node_modules/workflow/dist/stdlib.js"
+  ],
+  "workflowFiles": [
+    "/Users/myrios/Downloads/devfolio/claude-managed-agents/app/workflows/tail-session.ts"
+  ],
   "serdeOnlyFiles": []
 }
