@@ -117,7 +117,7 @@ export type GodivaAction =
 
 const workflowDefaults = {
   step: 0 as const,
-  emailOpen: false,
+  emailOpen: true,
   featToggles: [],
   toggleBackend: true,
   ackNoImpact: false,
@@ -157,7 +157,7 @@ function reducer(state: GodivaState, action: GodivaAction): GodivaState {
       return {
         ...state,
         signals: state.signals.map((s) =>
-          s.id === action.signalId ? { ...s, isNew: false } : s
+          s.id === action.signalId ? { ...s, isNew: false } : s,
         ),
       };
 
@@ -270,7 +270,11 @@ function reducer(state: GodivaState, action: GodivaAction): GodivaState {
       return { ...state, classifying: true, agentClassification: null };
 
     case "SET_CLASSIFICATION":
-      return { ...state, classifying: false, agentClassification: action.classification };
+      return {
+        ...state,
+        classifying: false,
+        agentClassification: action.classification,
+      };
 
     case "CLEAR_CLASSIFICATION":
       return { ...state, classifying: false, agentClassification: null };
@@ -290,7 +294,9 @@ function reducer(state: GodivaState, action: GodivaAction): GodivaState {
     case "ANALYSIS_DONE": {
       const rec = action.recommendation;
       // Map agent's affected_features back to featToggles (all on by default)
-      const currentSig = state.signals.find((s) => s.id === state.selectedSignalId);
+      const currentSig = state.signals.find(
+        (s) => s.id === state.selectedSignalId,
+      );
       const featToggles = currentSig
         ? currentSig.features.map(() => true)
         : rec.affected_features.map(() => true);

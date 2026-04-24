@@ -162,6 +162,8 @@ export function ManualInjectPanel({ onClose }: Props) {
           fontFamily: "inherit",
           outline: "none",
           boxSizing: "border-box",
+          maxHeight: "30vh",
+          overflowY: "auto",
         }}
       />
 

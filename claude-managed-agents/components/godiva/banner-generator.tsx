@@ -255,6 +255,8 @@ export function BannerGenerator() {
               resize: "none",
               lineHeight: 1.7,
               marginBottom: 8,
+              maxHeight: "30vh",
+              overflowY: "auto",
             }}
           />
           <button

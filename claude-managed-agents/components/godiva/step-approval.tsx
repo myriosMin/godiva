@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useGodiva, useCurrentSignal } from "@/components/godiva/godiva-context";
+import { GButton } from "@/components/godiva/g-button";
 
 function OkIcon() {
   return (
@@ -239,6 +240,8 @@ export function StepApproval() {
               fontFamily: "inherit",
               resize: "none",
               marginBottom: 10,
+              maxHeight: "30vh",
+              overflowY: "auto",
             }}
           />
 
@@ -279,25 +282,16 @@ export function StepApproval() {
             >
               {acting === "reject" ? "Rejecting…" : "Reject"}
             </button>
-            <button
+            <GButton
+              variant="primary"
               onClick={() => void handleApprove()}
               disabled={!!acting}
               style={{
-                padding: "7px 16px",
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: acting ? "default" : "pointer",
-                border: "1px solid var(--gv-acc)",
-                background: acting === "approve" ? "var(--gv-acc-bg)" : "var(--gv-acc)",
-                color: acting === "approve" ? "var(--gv-tx3)" : "var(--gv-card)",
-                fontFamily: "inherit",
-                letterSpacing: ".01em",
                 opacity: acting && acting !== "approve" ? 0.45 : 1,
               }}
             >
               {acting === "approve" ? "Approving…" : "Approve"}
-            </button>
+            </GButton>
           </div>
         </div>
       </div>

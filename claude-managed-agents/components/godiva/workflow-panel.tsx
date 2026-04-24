@@ -6,6 +6,7 @@ import { StepEventDetails } from "@/components/godiva/step-event-details";
 import { StepWorkflowConfig } from "@/components/godiva/step-workflow-config";
 import { StepApproval } from "@/components/godiva/step-approval";
 import { StepSummary } from "@/components/godiva/step-summary";
+import { GButton } from "@/components/godiva/g-button";
 
 const TABS = [
   "1. Event details",
@@ -86,8 +87,9 @@ export function WorkflowPanel() {
     return (
       <div
         style={{
-          width: 500,
-          flexShrink: 0,
+          width: "clamp(320px, 50vw, 500px)",
+          flexShrink: 1,
+          minWidth: 0,
           display: "flex",
           flexDirection: "column",
           background: "var(--gv-card)",
@@ -116,8 +118,9 @@ export function WorkflowPanel() {
   return (
     <div
       style={{
-        width: 500,
-        flexShrink: 0,
+        width: "clamp(320px, 50vw, 500px)",
+        flexShrink: 1,
+        minWidth: 0,
         display: "flex",
         flexDirection: "column",
         background: "var(--gv-card)",
@@ -225,36 +228,32 @@ export function WorkflowPanel() {
         }}
       >
         {state.step > 0 && (
-          <button
+          <GButton
+            variant="secondary"
             onClick={() => dispatch({ type: "PREV_STEP" })}
-            style={secondaryBtnStyle}
           >
             Back
-          </button>
+          </GButton>
         )}
         {state.step < 3 && (
           <>
             {state.step === 2 && isDone ? (
-              <button
+              <GButton
+                variant="primary"
                 onClick={() =>
                   dispatch({ type: "SET_STEP", step: 3 })
                 }
-                style={primaryBtnStyle}
               >
                 View summary
-              </button>
+              </GButton>
             ) : !isDone ? (
-              <button
+              <GButton
+                variant="primary"
                 onClick={() => dispatch({ type: "NEXT_STEP" })}
                 disabled={!canNext}
-                style={{
-                  ...primaryBtnStyle,
-                  opacity: canNext ? 1 : 0.45,
-                  cursor: canNext ? "pointer" : "not-allowed",
-                }}
               >
                 Next
-              </button>
+              </GButton>
             ) : null}
           </>
         )}
@@ -325,29 +324,3 @@ function EmptyState() {
   );
 }
 
-const secondaryBtnStyle: React.CSSProperties = {
-  padding: "7px 16px",
-  borderRadius: 8,
-  fontSize: 12,
-  fontWeight: 500,
-  cursor: "pointer",
-  border: "1px solid var(--gv-bdr)",
-  background: "var(--gv-card)",
-  color: "var(--gv-tx2)",
-  fontFamily: "inherit",
-  letterSpacing: ".01em",
-  transition: "all .12s",
-};
-
-const primaryBtnStyle: React.CSSProperties = {
-  padding: "7px 16px",
-  borderRadius: 8,
-  fontSize: 12,
-  fontWeight: 500,
-  cursor: "pointer",
-  border: "1px solid var(--gv-acc)",
-  background: "var(--gv-acc)",
-  color: "var(--gv-card)",
-  fontFamily: "inherit",
-  letterSpacing: ".01em",
-};

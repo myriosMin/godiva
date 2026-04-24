@@ -5,6 +5,24 @@ import type { FeatureStatus } from "@/lib/feature-status";
 
 const POLL_MS = 5000;
 
+const FS = { xs: 10, sm: 11, md: 12 } as const;
+
+const TRANSITION =
+  "color .3s ease, box-shadow .3s ease, background-color .3s ease";
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia(query);
+    const update = () => setMatches(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [query]);
+  return matches;
+}
+
 const COLOR = {
   up: {
     text: "#4caf72",
@@ -29,6 +47,10 @@ const S = {
     padding: "8px 14px",
     flexShrink: 0,
   },
+  barCompact: {
+    padding: "6px 10px",
+    gap: 6,
+  },
   header: {
     display: "flex",
     alignItems: "center",
@@ -37,7 +59,7 @@ const S = {
     marginRight: 4,
   },
   label: {
-    fontSize: 10,
+    fontSize: FS.xs,
     fontWeight: 600,
     letterSpacing: ".1em",
     color: "var(--gv-tx3)",
@@ -45,7 +67,7 @@ const S = {
     flexShrink: 0,
   },
   pill: {
-    fontSize: 10,
+    fontSize: FS.xs,
     fontWeight: 600,
     borderRadius: 4,
     padding: "2px 8px",
@@ -61,7 +83,7 @@ const S = {
     flexShrink: 0,
   },
   channelLabel: {
-    fontSize: 10,
+    fontSize: FS.xs,
     fontWeight: 600,
     letterSpacing: ".08em",
     textTransform: "uppercase",
@@ -82,14 +104,14 @@ const S = {
     borderRadius: "50%",
     display: "inline-block",
     flexShrink: 0,
-    transition: "all .3s",
+    transition: TRANSITION,
   },
   featureName: {
-    fontSize: 11,
-    transition: "color .3s",
+    fontSize: FS.sm,
+    transition: TRANSITION,
   },
   errorPill: {
-    fontSize: 10,
+    fontSize: FS.xs,
     fontWeight: 600,
     color: "var(--gv-err)",
     background: "var(--gv-err-bg)",
@@ -149,6 +171,10 @@ function ChannelGroup({
 export function FeatureStatusBar() {
   const [features, setFeatures] = useState<FeatureStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // <768px: hide per-channel groups, show only the pill summary.
+  // <640px: also tighten padding/gap.
+  const hideChannelGroups = useMediaQuery("(max-width: 767px)");
+  const isCompact = useMediaQuery("(max-width: 639px)");
 
   useEffect(() => {
     let mounted = true;
@@ -177,9 +203,11 @@ export function FeatureStatusBar() {
     };
   }, []);
 
+  const barStyle = isCompact ? { ...S.bar, ...S.barCompact } : S.bar;
+
   if (error) {
     return (
-      <div style={S.bar}>
+      <div style={barStyle}>
         <span style={S.label}>System Status</span>
         <span style={S.errorPill}>{error}</span>
       </div>
@@ -196,15 +224,16 @@ export function FeatureStatusBar() {
   const downCount = features.filter((f) => !f.up).length;
 
   return (
-    <div style={S.bar}>
+    <div style={barStyle}>
       <div style={S.header}>
-        <span style={S.label}>System Status</span>
+        {!isCompact && <span style={S.label}>System Status</span>}
         <StatusPill downCount={downCount} />
       </div>
 
-      {Object.entries(groups).map(([channel, feats]) => (
-        <ChannelGroup key={channel} channel={channel} feats={feats} />
-      ))}
+      {!hideChannelGroups &&
+        Object.entries(groups).map(([channel, feats]) => (
+          <ChannelGroup key={channel} channel={channel} feats={feats} />
+        ))}
     </div>
   );
 }

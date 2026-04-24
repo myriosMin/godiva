@@ -54,10 +54,21 @@ function ClassificationEffect() {
 
 export function GodivaPanel() {
   return (
-    <div className="godiva flex h-full min-h-0">
-      <ClassificationEffect />
-      <SignalSidebar />
-      <WorkflowPanel />
-    </div>
+    <>
+      {/* On mobile (<768px), stack sidebar + workflow vertically so the
+          fixed-width sidebar doesn't cause horizontal scroll on phones. */}
+      <style>{`
+        @media (max-width: 767px) {
+          .godiva-panel { flex-direction: column; }
+          .godiva-panel > * { width: 100% !important; max-width: 100% !important; }
+          .godiva-panel > :first-of-type { height: auto; max-height: 40vh; }
+        }
+      `}</style>
+      <div className="godiva godiva-panel flex h-full min-h-0 overflow-hidden">
+        <ClassificationEffect />
+        <SignalSidebar />
+        <WorkflowPanel />
+      </div>
+    </>
   );
 }

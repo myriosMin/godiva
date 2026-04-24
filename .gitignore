@@ -4,3 +4,4 @@ raw_docs/
 claude-managed-agents/node_modules/
 claude-managed-agents/.next/
 claude-managed-agents/.env*
+assets/*.mov

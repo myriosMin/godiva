@@ -1,9 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useGodiva, useCurrentSignal } from "@/components/godiva/godiva-context";
 import { FeatureToggleRow, TogglePill } from "@/components/godiva/feature-toggle-row";
 import { BannerGenerator } from "@/components/godiva/banner-generator";
 import { isPay } from "@/lib/godiva-data";
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia(query);
+    const update = () => setMatches(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [query]);
+  return matches;
+}
 
 function OkIcon() {
   return (
@@ -23,6 +37,7 @@ function OkIcon() {
 export function StepWorkflowConfig() {
   const { state, dispatch } = useGodiva();
   const sig = useCurrentSignal();
+  const isNarrow = useMediaQuery("(max-width: 599px)");
   if (!sig) return null;
 
   if (sig.noImpact) {
@@ -128,7 +143,7 @@ export function StepWorkflowConfig() {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
+        gridTemplateColumns: isNarrow ? "1fr" : "1fr 1fr",
         gap: 12,
         alignItems: "start",
       }}

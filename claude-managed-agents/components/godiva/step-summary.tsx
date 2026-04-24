@@ -218,11 +218,11 @@ export function StepSummary() {
               </span>
             </div>
             <SummaryRow label="Bundle" value={
-              <span className="font-mono" style={{ color: "#9b72cf", fontSize: 11 }}>{bundle}</span>
+              <span className="font-mono" style={{ color: "var(--gv-acc)", fontSize: 11, wordBreak: "break-all", overflowWrap: "anywhere" }}>{bundle}</span>
             } />
             <SummaryRow label="Features toggled" value={`${flagCount} flag${flagCount !== 1 ? "s" : ""}`} />
             <SummaryRow label="Service Event ID" value={
-              <span className="font-mono" style={{ fontSize: 11 }}>{eventId}</span>
+              <span className="font-mono" style={{ fontSize: 11, wordBreak: "break-all", overflowWrap: "anywhere" }}>{eventId}</span>
             } />
             <SummaryRow label="Applied at" value={fmtTime(state.confirmedAt)} last />
           </ABox>

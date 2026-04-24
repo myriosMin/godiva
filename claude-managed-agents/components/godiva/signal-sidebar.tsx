@@ -62,7 +62,8 @@ export function SignalSidebar() {
   return (
     <div
       style={{
-        width: 255,
+        width: "clamp(200px, 25vw, 255px)",
+        minWidth: 200,
         flexShrink: 0,
         background: "var(--gv-sb)",
         borderRight: "1px solid var(--gv-bdr)",
