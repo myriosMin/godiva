@@ -77,13 +77,17 @@ export const managedAgentSession = pgTable("managed_agent_session", {
 
 export const godivaIncident = pgTable("godiva_incident", {
   id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => managedAgentSession.id, { onDelete: "cascade" }),
   anthropicSessionId: text("anthropic_session_id").notNull(),
   signalData: jsonb("signal_data"),
   recommendation: jsonb("recommendation"),
   approvalStatus: text("approval_status").notNull().default("pending"),
   approvedBy: text("approved_by"),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
+  rejectedBy: text("rejected_by"),
+  rejectedAt: timestamp("rejected_at", { withTimezone: true }),
   operatorNotes: text("operator_notes"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

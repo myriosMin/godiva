@@ -47,8 +47,8 @@ export async function POST(request: Request) {
     .update(godivaIncident)
     .set({
       approvalStatus: "rejected",
-      approvedBy: rejectedBy,
-      approvedAt: new Date(),
+      rejectedBy,
+      rejectedAt: new Date(),
       operatorNotes: reason ?? null,
     })
     .where(eq(godivaIncident.sessionId, sessionId));

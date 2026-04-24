@@ -46,14 +46,16 @@ export function StepApproval() {
   const { state, dispatch } = useGodiva();
   const sig = useCurrentSignal();
   const [acting, setActing] = useState<"approve" | "reject" | null>(null);
+  const [error, setError] = useState<string | null>(null);
   if (!sig) return null;
 
   async function handleApprove() {
     if (acting) return;
     setActing("approve");
+    setError(null);
     try {
       if (state.agentSessionId) {
-        await fetch("/api/godiva/approve", {
+        const res = await fetch("/api/godiva/approve", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -62,32 +64,47 @@ export function StepApproval() {
             notes: state.notes || undefined,
           }),
         });
+        if (!res.ok) {
+          setError("Approval failed — please try again.");
+          setActing(null);
+          return;
+        }
       }
+      dispatch({ type: "APPROVE" });
+    } catch {
+      setError("Network error — please try again.");
     } finally {
       setActing(null);
     }
-    dispatch({ type: "APPROVE" });
   }
 
   async function handleReject() {
     if (acting) return;
     setActing("reject");
+    setError(null);
     try {
       if (state.agentSessionId) {
-        await fetch("/api/godiva/reject", {
+        const res = await fetch("/api/godiva/reject", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sessionId: state.agentSessionId,
             rejectedBy: "Product Lead",
-            notes: state.notes || undefined,
+            reason: state.notes || undefined,
           }),
         });
+        if (!res.ok) {
+          setError("Rejection failed — please try again.");
+          setActing(null);
+          return;
+        }
       }
+      dispatch({ type: "REJECT" });
+    } catch {
+      setError("Network error — please try again.");
     } finally {
       setActing(null);
     }
-    dispatch({ type: "REJECT" });
   }
 
   if (state.approved) {
@@ -224,6 +241,22 @@ export function StepApproval() {
               marginBottom: 10,
             }}
           />
+
+          {error && (
+            <div
+              style={{
+                padding: "8px 11px",
+                marginBottom: 10,
+                borderRadius: 8,
+                border: "1px solid rgba(168,64,56,.25)",
+                background: "var(--gv-err-bg)",
+                color: "var(--gv-err)",
+                fontSize: 11,
+              }}
+            >
+              {error}
+            </div>
+          )}
 
           {/* Action buttons */}
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
