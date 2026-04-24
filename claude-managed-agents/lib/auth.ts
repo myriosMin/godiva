@@ -62,6 +62,16 @@ export const auth = betterAuth({
                 clientSecret: vercelClientSecret!,
                 scopes: ["openid", "email", "profile", "offline_access"],
                 pkce: true,
+                mapProfileToUser: (profile: Record<string, string>) => ({
+                  name:
+                    profile.name ||
+                    profile.preferred_username ||
+                    profile.username ||
+                    profile.email?.split("@")[0] ||
+                    "Vercel User",
+                  email: profile.email,
+                  image: profile.picture || profile.avatar_url,
+                }),
               },
             ],
           }),
