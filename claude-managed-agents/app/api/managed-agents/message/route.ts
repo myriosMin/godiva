@@ -1,10 +1,12 @@
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { start } from "workflow/api";
+import { HookNotFoundError } from "workflow/errors";
 import { db } from "@/lib/db";
 import { managedAgentSession } from "@/lib/schema";
 import { requireUserId } from "@/lib/session";
 import { checkMessageRateLimit } from "@/lib/rate-limit";
-import { messageHook } from "@/app/workflows/tail-session";
+import { messageHook, sessionWorkflow } from "@/app/workflows/tail-session";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -71,7 +73,28 @@ export async function POST(request: Request) {
       ),
     );
 
-  await messageHook.resume(`msg:${sessionId}`, { text });
+  let newRunId: string | undefined;
+  try {
+    await messageHook.resume(`msg:${sessionId}`, { text });
+  } catch (err) {
+    if (!HookNotFoundError.is(err)) throw err;
 
-  return NextResponse.json({ ok: true });
+    // Workflow run was lost (e.g. dev server restart). Start a new one that
+    // treats this message as the initial turn, then keeps waiting for more.
+    const run = await start(sessionWorkflow, [
+      {
+        internalSessionId: sessionId,
+        anthropicSessionId: row.anthropicSessionId,
+        initialMessage: text,
+      },
+    ]);
+    newRunId = run.runId;
+
+    await db
+      .update(managedAgentSession)
+      .set({ workflowRunId: run.runId })
+      .where(eq(managedAgentSession.id, sessionId));
+  }
+
+  return NextResponse.json({ ok: true, ...(newRunId ? { runId: newRunId } : {}) });
 }

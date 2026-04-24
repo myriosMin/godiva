@@ -1,0 +1,22 @@
+{
+  "godiva-ld-reference": {
+    "skillId": "skill_01AN45nKTy6pXMvzg5ZZn6rX",
+    "latestVersion": "1777006058399066",
+    "displayTitle": "godiva-ld-reference"
+  },
+  "godiva-severity-rules": {
+    "skillId": "skill_01MrPrLnoK2pnkJTwVfp718B",
+    "latestVersion": "1777006059768669",
+    "displayTitle": "godiva-severity-rules"
+  },
+  "godiva-signal-schema": {
+    "skillId": "skill_01XzKU7Mownk62kaBtiqmYm3",
+    "latestVersion": "1777006061231884",
+    "displayTitle": "godiva-signal-schema"
+  },
+  "godiva-sop-playbook": {
+    "skillId": "skill_019CdC37i1WTctNWBJRx6UcP",
+    "latestVersion": "1777006062595882",
+    "displayTitle": "godiva-sop-playbook"
+  }
+}

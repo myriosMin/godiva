@@ -1,0 +1,418 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F6F1EA;
+  --card:#FDFAF6;
+  --sb:#EDE7DD;
+  --sb2:#E5DDD0;
+  --bdr:#D8CFC2;
+  --bdr2:#C8BBAA;
+  --tx1:#2C2016;
+  --tx2:#7A6650;
+  --tx3:#A89478;
+  --acc:#8B5C38;
+  --acc-bg:#F2EAE0;
+  --acc-light:#FAF4EE;
+  --acc-hover:#723F20;
+  --ok:#4A6B50;
+  --ok-bg:#E8F0E8;
+  --ok-tx:#243A26;
+  --warn:#A86C20;
+  --warn-bg:#FAF0DF;
+  --warn-tx:#6A3C08;
+  --err:#A84038;
+  --err-bg:#F5E8E6;
+  --err-tx:#6A1C18;
+  --minor:#5A6B4A;
+  --minor-bg:#EDF0E5;
+  --minor-tx:#283818;
+  --r-sm:8px;
+  --r-md:10px;
+  --r-lg:14px;
+}
+.wrap{display:grid;grid-template-columns:255px 1fr;min-height:600px;border:1px solid var(--bdr);border-radius:var(--r-lg);overflow:hidden;background:var(--card);font-family:var(--font-sans)}
+/* SIDEBAR */
+.sb{background:var(--sb);border-right:1px solid var(--bdr);display:flex;flex-direction:column}
+.sb-hd{padding:14px 14px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px}
+.sb-title{font-size:10px;font-weight:500;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em}
+.sig-list{flex:1;padding:8px;overflow-y:auto}
+.sig-item{padding:10px 11px;border-radius:var(--r-md);cursor:pointer;margin-bottom:3px;border:1px solid transparent;transition:all .12s}
+.sig-item:hover{background:var(--card);border-color:var(--bdr)}
+.sig-item.active{background:var(--card);border-color:var(--acc-bg);box-shadow:0 1px 4px rgba(139,92,56,.08)}
+.sdom{font-size:12px;font-weight:500;color:var(--tx1);margin-bottom:2px}
+.sfrom{font-size:11px;color:var(--tx3);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.smeta{display:flex;gap:5px;align-items:center}
+.stime{font-size:10px;color:var(--tx3);margin-left:auto}
+/* BADGES */
+.badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;letter-spacing:.02em}
+.bc{background:var(--err-bg);color:var(--err)}
+.bm{background:var(--warn-bg);color:var(--warn)}
+.bni{background:var(--minor-bg);color:var(--minor)}
+.bnw{background:var(--acc-bg);color:var(--acc)}
+/* MAIN */
+.main{display:flex;flex-direction:column;min-width:0;background:var(--card)}
+.tbar{padding:13px 18px;border-bottom:1px solid var(--bdr);background:var(--card)}
+.tt{font-size:13px;font-weight:500;color:var(--tx1);letter-spacing:-.01em}
+.ts2{font-size:11px;color:var(--tx3);margin-top:3px}
+/* STEP TABS */
+.stabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--card);padding:0 4px}
+.stab{padding:10px 14px;font-size:12px;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .12s;letter-spacing:.01em}
+.stab:hover{color:var(--tx2)}
+.stab.active{color:var(--acc);border-bottom-color:var(--acc);font-weight:500}
+.stab.done{color:var(--ok)}
+/* CONTENT */
+.content{flex:1;padding:16px 18px;overflow-y:auto;background:var(--bg)}
+.lbl{font-size:10px;font-weight:500;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+/* PARSED GRID */
+.pg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.pc{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:9px 12px}
+.pl{font-size:10px;color:var(--tx3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
+.pv{font-size:12px;font-weight:500;color:var(--tx1)}
+.rc{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:10px 13px;margin-bottom:10px;font-size:12px;color:var(--tx2);line-height:1.6}
+/* FEATURE TABLE */
+.ft{border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;margin-bottom:10px;background:var(--card)}
+.fr{display:grid;grid-template-columns:1fr 80px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bdr);font-size:12px}
+.fr:last-child{border-bottom:none}
+.fh{background:var(--sb);font-size:10px;color:var(--tx3);font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.fn{font-weight:500;color:var(--tx1)}
+.fi{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.4}
+/* EMAIL */
+.eb{border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;margin-bottom:4px;background:var(--card)}
+.eh{padding:9px 13px;background:var(--sb);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.eh:hover{background:var(--sb2)}
+.ebody{padding:13px;font-size:11px;color:var(--tx2);line-height:1.9;font-family:var(--font-mono);white-space:pre-wrap;border-top:1px solid var(--bdr);background:var(--acc-light)}
+/* TWO COL */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+/* PANEL */
+.panel{border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;margin-bottom:10px;background:var(--card)}
+.phd{padding:9px 13px;background:var(--sb);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em}
+.pb{padding:11px 12px}
+/* TOGGLE ROW */
+.trow{display:flex;align-items:center;justify-content:space-between;padding:10px 11px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:6px;cursor:pointer;border:1px solid var(--bdr);transition:all .12s}
+.trow:last-child{margin-bottom:0}
+.trow:hover{border-color:var(--bdr2)}
+.trow.on{border-color:rgba(139,92,56,.35);background:var(--acc-bg)}
+.trow.off{border-color:var(--bdr);background:var(--bg)}
+.tlb{font-size:12px;font-weight:500;color:var(--tx1)}
+.tsb{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.4}
+/* PILL */
+.pill{width:34px;height:20px;border-radius:10px;position:relative;flex-shrink:0;transition:background .15s}
+.pill.on{background:var(--acc);border:1.5px solid var(--acc)}
+.pill.off{background:var(--sb2);border:1.5px solid var(--bdr2)}
+.pip{width:13px;height:13px;border-radius:50%;background:var(--card);position:absolute;top:2px;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.pill.on .pip{left:17px}
+.pill.off .pip{left:2px}
+.tog-state{font-size:10px;font-weight:500;margin-left:6px;min-width:22px;letter-spacing:.04em}
+.tog-state.on{color:var(--acc)}
+.tog-state.off{color:var(--tx3)}
+/* INPUTS */
+.sel-in{width:100%;padding:7px 10px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:12px;background:var(--card);color:var(--tx1);margin-bottom:8px;font-family:var(--font-sans)}
+.sel-in:focus{outline:none;border-color:var(--acc)}
+.txt-in{width:100%;padding:7px 10px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:12px;background:var(--card);color:var(--tx1);margin-bottom:8px;font-family:var(--font-sans)}
+.txt-in:focus{outline:none;border-color:var(--acc)}
+.ta{width:100%;padding:9px 11px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:12px;background:var(--card);color:var(--tx1);font-family:var(--font-sans);resize:none;line-height:1.7;margin-bottom:8px}
+.ta:focus{outline:none;border-color:var(--acc)}
+.flbl{font-size:11px;color:var(--tx3);margin-bottom:4px;letter-spacing:.02em}
+/* APPROVAL */
+.abox{border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;margin-bottom:10px;background:var(--card)}
+.ahd{padding:9px 13px;background:var(--sb);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rcd{background:var(--bg);border-radius:var(--r-sm);padding:10px 11px;border:1px solid var(--bdr)}
+.rl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+.rn{font-size:12px;font-weight:500;color:var(--tx1);margin-bottom:4px}
+.rp{font-size:11px;color:var(--warn)}
+.ra{font-size:11px;color:var(--ok)}
+.nin{width:100%;padding:8px 11px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:12px;background:var(--card);color:var(--tx1);font-family:var(--font-sans);resize:none;margin-bottom:10px}
+.nin:focus{outline:none;border-color:var(--acc)}
+.arow{display:flex;gap:8px;justify-content:flex-end}
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bdr);background:var(--card);color:var(--tx2);transition:all .12s;font-family:var(--font-sans);letter-spacing:.01em}
+.btn:hover{background:var(--sb);border-color:var(--bdr2);color:var(--tx1)}
+.btna{background:var(--acc);color:var(--card);border-color:var(--acc)}
+.btna:hover{background:var(--acc-hover);border-color:var(--acc-hover)}
+.btna:disabled{opacity:.45;cursor:not-allowed}
+.btnr{background:var(--err-bg);color:var(--err);border-color:rgba(168,64,56,.25)}
+.btnr:hover{background:var(--err);color:var(--card)}
+.bsm{padding:5px 11px;font-size:11px}
+/* SUMMARY */
+.srow{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:12px;gap:12px}
+.srow:last-child{border-bottom:none}
+.sl{color:var(--tx3);flex-shrink:0}
+.sv{color:var(--tx1);font-weight:500;text-align:right}
+/* STATUS BARS */
+.dg{display:flex;align-items:center;gap:9px;padding:11px 13px;background:var(--ok-bg);border-radius:var(--r-md);border:1px solid rgba(74,107,80,.2);font-size:12px;color:var(--ok);font-weight:500;margin-bottom:12px}
+.dr{display:flex;align-items:center;gap:9px;padding:11px 13px;background:var(--err-bg);border-radius:var(--r-md);border:1px solid rgba(168,64,56,.2);font-size:12px;color:var(--err);font-weight:500;margin-bottom:12px}
+.ackd{display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--ok-bg);border-radius:var(--r-md);border:1px solid rgba(74,107,80,.2);font-size:12px;color:var(--ok);margin-bottom:10px}
+/* ACK */
+.ackw{padding:28px;text-align:center;border:1px solid var(--bdr);border-radius:var(--r-md);background:var(--card)}
+/* NAV */
+.bnav{padding:11px 18px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:8px;background:var(--card)}
+/* EMPTY */
+.empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--tx3);font-size:13px;padding:48px;background:var(--bg)}
+.gen-loading{padding:24px;text-align:center;font-size:12px;color:var(--tx3)}
+</style>
+
+<h2 class="sr-only">Incident Command Dashboard</h2>
+<div class="wrap" id="app"></div>
+
+<script>
+var PAY=['paynow','uob','mpgs','mastercard','giro','egiro','credit card','debit card','card payment'];
+var TMPLS=[
+  {id:0,scenario:'PayNow intermittent maintenance',title:'Scheduled Maintenance',body:'Our payment partner will be conducting scheduled maintenance on [Date: DD-MM], [Time: HH:MM] SGT. PayNow QR transactions on [Date: DD-MM] [Time: HH:MM] SGT may take up to 1 day to be reflected on the SP app. EV Charging remains available. Thank you for your understanding.'},
+  {id:1,scenario:'FAST platform - PayNow QR unavailable',title:'Scheduled Maintenance',body:'Our payment partner will be conducting scheduled maintenance on [Date: DD-MM], [Time: HH:MM] SGT. PayNow QR service will not be available during the period. Please use alternative payment modes. EV Charging remains available. Thank you for your understanding.'},
+  {id:2,scenario:'Card payment unavailable',title:'Scheduled Maintenance',body:'Our payment partner will be conducting scheduled maintenance on [Date: DD-MM], [Time: HH:MM] SGT. Credit and debit card payments will not be available during this period. Please use PayNow or GIRO as alternative payment modes. Thank you for your understanding.'},
+  {id:3,scenario:'General system maintenance',title:'Scheduled Maintenance',body:'We will be performing scheduled system maintenance on [Date: DD-MM], [Time: HH:MM] SGT. Some features may be temporarily unavailable. We apologise for the inconvenience and thank you for your understanding.'}
+];
+var SIGS=[
+  {id:1,domain:'PayNow',from:'uob-paynow@uob.com.sg',sev:'critical',time:'09:14',date:'25042026',win:'02:00 - 06:00',dur:'4 hrs',sys:'UOB PayNow API',reason:'Scheduled backend infrastructure upgrade',noImpact:false,
+  features:[
+    {n:'PayNow payment',i:'Payment screen — PayNow feature shows MAINTENANCE pill (disallows user from generating QR)',hideFromStep1:false,hideFromStep2:false},
+    {n:'Bill pay button',i:'Button greyed out (disallows user from generating QR)',hideFromStep1:true,hideFromStep2:true},
+    {n:'PPMS PayNow',i:'Prepaid top-up via PayNow shows MAINTENANCE pill (disallows user from generating QR)',hideFromStep1:false,hideFromStep2:false}
+  ],
+  email:'From: uob-paynow@uob.com.sg\nTo: sp-operations@spgroup.com.sg\nSubject: [MAINTENANCE] UOB PayNow API - 25 Apr 2026\n\nDear SP Group Ops Team,\n\nUOB PayNow will undergo scheduled maintenance.\n\nDate:   25 April 2026 (Saturday)\nTime:   02:00 - 06:00 SGT (4 hours)\nSystem: UOB PayNow API\n\nImpact:\n  All PayNow transactions unavailable.\n  Customers cannot pay bills via PayNow.\n\nRegards,\nUOB Operations Team'},
+  {id:2,domain:'SAP / Billing',from:'sap-ops@sp.com.sg',sev:'critical',time:'11:30',date:'03052026',win:'00:00 - 04:00',dur:'4 hrs',sys:'SAP EBS / SAP MSSL',reason:'SAP database patch - monthly billing cycle maintenance',noImpact:false,
+  features:[
+    {n:'Billing enabled',i:'Customer cannot view bill',hideFromStep1:false,hideFromStep2:false},
+    {n:'SAP chart enabled',i:'Yearly charts unavailable',hideFromStep1:false,hideFromStep2:false},
+    {n:'Electricity chart',i:'Elec chart down',hideFromStep1:false,hideFromStep2:false},
+    {n:'Home chart',i:'Home overview down',hideFromStep1:false,hideFromStep2:false}
+  ],
+  email:'From: sap-ops@sp.com.sg\nTo: sp-operations@spgroup.com.sg\nSubject: [MAINTENANCE] SAP EBS Monthly Patch - 3 May 2026\n\nHi Team,\n\nSAP EBS / SAP MSSL monthly patch maintenance.\n\nDate:   3 May 2026 (Sunday)\nTime:   00:00 - 04:00 SGT\nSystem: SAP EBS / SAP MSSL\n\nImpact:\n  Bill viewing unavailable. Yearly charts offline.\n\nSAP Operations'},
+  {id:3,domain:'Card Payment',from:'mpgs-ops@mastercard.com',sev:'critical',time:'14:05',date:'28042026',win:'23:00 - 03:00',dur:'4 hrs',sys:'MPGS / UOB',reason:'Payment gateway TLS certificate rotation',noImpact:false,
+  features:[
+    {n:'Credit cards',i:'Cannot pay by card',hideFromStep1:false,hideFromStep2:false},
+    {n:'Fetch credit cards',i:'Card list unavailable',hideFromStep1:false,hideFromStep2:false},
+    {n:'Manage card',i:'Add / remove disabled',hideFromStep1:false,hideFromStep2:false},
+    {n:'Init auth',i:'Auth flow blocked',hideFromStep1:false,hideFromStep2:false}
+  ],
+  email:'From: mpgs-ops@mastercard.com\nTo: sp-operations@spgroup.com.sg\nSubject: URGENT - MPGS Mastercard Gateway Maintenance 28 Apr\n\nDear Partner,\n\nMastercard Payment Gateway Services (MPGS) TLS certificate rotation.\n\nDate:   28 April 2026\nWindow: 23:00 SGT (28 Apr) - 03:00 SGT (29 Apr)\n\nImpact: Credit and debit card transactions unavailable.\n\nMastercard MPGS Operations'},
+  {id:4,domain:'Live Chat',from:'k2-support@sp.com.sg',sev:'major',time:'16:22',date:'26042026',win:'22:00 - 02:00',dur:'4 hrs',sys:'K2 / CFMS',reason:'K2 workflow engine upgrade',noImpact:false,
+  features:[
+    {n:'Live chat',i:'Chat entry hidden',hideFromStep1:false,hideFromStep2:false},
+    {n:'Messaging',i:'Messaging disabled',hideFromStep1:false,hideFromStep2:false},
+    {n:'Report incident',i:'Disabled',hideFromStep1:false,hideFromStep2:false}
+  ],
+  email:'From: k2-support@sp.com.sg\nTo: sp-operations@spgroup.com.sg\nSubject: [SCHEDULED] K2 Workflow Engine Upgrade - 26 Apr 2026\n\nHi SP Ops,\n\nK2 workflow engine upgrade.\n\nDate: 26 April 2026, 22:00 - 02:00 SGT\nSystem: K2 / CFMS\n\nImpact: Live chat, messaging and incident reporting unavailable.\n\nK2 Platform Team'},
+  {id:5,domain:'Home Banner',from:'cms-ops@sp.com.sg',sev:'minor',time:'08:45',date:'27042026',win:'10:00 - 12:00',dur:'2 hrs',sys:'Magnolia CMS',reason:'CMS config update - no customer-facing impact',noImpact:true,
+  features:[
+    {n:'Home banner slot',i:'Internal config refresh only',hideFromStep1:false,hideFromStep2:false}
+  ],
+  email:'From: cms-ops@sp.com.sg\nTo: sp-operations@spgroup.com.sg\nSubject: CMS Config Update - No Customer Impact\n\nHi Team,\n\nCMS backend config update for home banner slot.\n\nDate: 27 April 2026, 10:00 - 12:00 SGT\n\nImpact: None to end customers.\n\nCMS Team'}
+];
+
+var ST={sel:null,step:0,emailOpen:false,featToggles:[],tBE:true,ack:false,banTmpl:0,banTitle:'',banBody:'',banDone:false,banLoading:false,notes:'',approved:false,rejected:false,apAt:null,startAt:null};
+function getSig(){for(var i=0;i<SIGS.length;i++){if(SIGS[i].id===ST.sel)return SIGS[i];}return null;}
+function isPay(s){var t=(s.domain+' '+s.sys+' '+s.reason).toLowerCase();return PAY.some(function(k){return t.indexOf(k)>=0;});}
+function fmt(d){return d?d.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—';}
+function sc(sev){return sev==='critical'?'bc':sev==='major'?'bm':'bni';}
+function badge(sev){return '<span class="badge '+sc(sev)+'">'+sev+'</span>';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function pill(on){return '<div style="display:flex;align-items:center;flex-shrink:0"><div class="pill '+(on?'on':'off')+'"><div class="pip"></div></div><span class="tog-state '+(on?'on':'off')+'">'+(on?'ON':'OFF')+'</span></div>';}
+function parseDateWin(s){var dd=s.date.substring(0,2),mm=s.date.substring(2,4);var parts=s.win.split('-');return {dateStr:dd+'-'+mm,timeStr:parts[0]?parts[0].trim():s.win};}
+function fillTmpl(tmpl,s){var dw=parseDateWin(s);var b=tmpl.body.replace(/\[Date: DD-MM\]/g,dw.dateStr).replace(/\[Time: HH:MM\]/g,dw.timeStr);return {title:tmpl.title,body:b};}
+function autoPickTmpl(s){var t=(s.domain+' '+s.sys+' '+s.reason).toLowerCase();if(t.indexOf('fast')>=0)return 1;if(t.indexOf('paynow')>=0||t.indexOf('uob')>=0)return 0;if(t.indexOf('card')>=0||t.indexOf('mpgs')>=0||t.indexOf('mastercard')>=0)return 2;return 3;}
+function okIco(){return '<svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.5" fill="#4A6B50"/><path d="M4.5 7.5l2.3 2.3L10.5 5" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>';}
+function errIco(){return '<svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.5" fill="#A84038"/><path d="M5 5l5 5M10 5l-5 5" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>';}
+
+function go(){document.getElementById('app').innerHTML=buildSide()+buildMain();attachAll();}
+
+function buildSide(){
+  var h='<div class="sb"><div class="sb-hd"><span class="sb-title">Signal intake</span><span class="badge bnw" style="margin-left:2px">'+SIGS.length+'</span></div><div class="sig-list">';
+  for(var i=0;i<SIGS.length;i++){
+    var s=SIGS[i];
+    h+='<div class="sig-item'+(ST.sel===s.id?' active':'')+'" data-id="'+s.id+'">';
+    h+='<div class="sdom">'+s.domain+'</div><div class="sfrom">'+s.from+'</div>';
+    h+='<div class="smeta"><span class="badge '+sc(s.sev)+'">'+s.sev+'</span>';
+    if(s.noImpact)h+=' <span class="badge bni">no impact</span>';
+    h+='<span class="stime">'+s.time+'</span></div></div>';
+  }
+  return h+'</div></div>';
+}
+
+function buildMain(){
+  var s=getSig();
+  if(!s)return '<div class="main"><div class="empty"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="4" y="6" width="28" height="24" rx="4" stroke="#A89478" stroke-width="1.5"/><line x1="10" y1="14" x2="26" y2="14" stroke="#A89478" stroke-width="1.2"/><line x1="10" y1="19" x2="20" y2="19" stroke="#A89478" stroke-width="1.2"/></svg><span style="color:#A89478;font-size:13px;letter-spacing:.01em">Select a maintenance signal</span></div></div>';
+  var tabs=['1. Event details','2. Workflow config','3. Approval','4. Summary'];
+  var th='';
+  for(var i=0;i<tabs.length;i++){var tc=ST.step===i?' active':ST.step>i?' done':'';th+='<div class="stab'+tc+'" data-tab="'+i+'">'+tabs[i]+'</div>';}
+  var fns=[buildS1,buildS2,buildS3,buildS4];
+  return '<div class="main"><div class="tbar"><div class="tt">Incident Command</div><div class="ts2">'+s.domain+' &middot; '+s.date+' &middot; '+s.win+'</div></div><div class="stabs">'+th+'</div><div class="content">'+fns[ST.step](s)+'</div>'+buildNav(s)+'</div>';
+}
+
+function buildNav(s){
+  var atAp=ST.step===2,done=ST.approved||ST.rejected,last=ST.step===3;
+  var canNext=!(ST.step===1&&s.noImpact&&!ST.ack);
+  var h='<div class="bnav">';
+  if(ST.step>0)h+='<button class="btn" id="bb">Back</button>';
+  if(!last){if(atAp&&done)h+='<button class="btn btna" id="bn">View summary</button>';else if(!done)h+='<button class="btn btna" id="bn"'+(canNext?'':' disabled')+'>Next</button>';}
+  return h+'</div>';
+}
+
+function buildS1(s){
+  var rows='';
+  for(var i=0;i<s.features.length;i++){
+    if(s.features[i].hideFromStep1)continue;
+    rows+='<div class="fr"><div><div class="fn">'+s.features[i].n+'</div><div class="fi">'+s.features[i].i+'</div></div><div>'+badge(s.sev)+'</div></div>';
+  }
+  var elbl=ST.emailOpen?'hide':'view source';
+  var ebdy=ST.emailOpen?'<div class="ebody">'+s.email+'</div>':'';
+  return '<p class="lbl">Parsed maintenance event</p>'
+    +'<div class="pg"><div class="pc"><div class="pl">System</div><div class="pv">'+s.sys+'</div></div><div class="pc"><div class="pl">Date</div><div class="pv">'+s.date+'</div></div><div class="pc"><div class="pl">Window</div><div class="pv">'+s.win+'</div></div></div>'
+    +'<div class="rc"><strong style="color:var(--tx1);font-weight:500">Reason —</strong> '+s.reason+'</div>'
+    +'<p class="lbl">Affected features</p>'
+    +'<div class="ft"><div class="fr fh"><div>Feature &amp; impact</div><div>Severity</div></div>'+rows+'</div>'
+    +'<p class="lbl">Email evidence</p>'
+    +'<div class="eb"><div class="eh" id="etog"><span style="font-size:12px;font-weight:500;color:var(--tx1)">Source email &mdash; '+s.from+'</span><span style="font-size:11px;color:var(--tx3)">'+elbl+'</span></div>'+ebdy+'</div>';
+}
+
+function buildS2(s){
+  if(s.noImpact){
+    if(ST.ack)return '<div class="ackd">'+okIco()+' Acknowledged &mdash; no customer impact. Proceed to approval.</div>';
+    return '<div class="ackw"><div style="width:48px;height:48px;border-radius:50%;background:var(--ok-bg);border:1px solid rgba(74,107,80,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#4A6B50" stroke-width="1.5"/><path d="M12 8v5M12 15v1" stroke="#4A6B50" stroke-width="1.5" stroke-linecap="round"/></svg></div><p style="font-size:13px;font-weight:500;color:var(--tx1);margin-bottom:6px;letter-spacing:-.01em">No customer impact detected</p><p style="font-size:12px;color:var(--tx3);line-height:1.7;margin-bottom:18px">No feature toggles or maintenance banner required for this event.</p><button class="btn btna" id="btn-ack">Acknowledge &amp; continue</button></div>';
+  }
+  return '<div class="two">'+buildFEPanel(s)+buildBannerPanel(s)+'</div>';
+}
+
+function buildFEPanel(s){
+  var pay=isPay(s);
+  var feRows='';
+  for(var i=0;i<s.features.length;i++){
+    if(s.features[i].hideFromStep2)continue;
+    var on=ST.featToggles[i]===true;
+    feRows+='<div class="trow '+(on?'on':'off')+'" id="ft-'+i+'">'
+      +'<div><div class="tlb">'+s.features[i].n+'</div><div class="tsb">'+s.features[i].i+'</div></div>'
+      +pill(on)+'</div>';
+  }
+  var bePanel='';
+  if(pay){
+    var beOn=ST.tBE;
+    bePanel='<div class="panel"><div class="phd">Back-end payment toggle</div><div class="pb">'
+      +'<div class="trow '+(beOn?'on':'off')+'" id="betog">'
+      +'<div><div class="tlb">Pause recurring batch jobs</div><div class="tsb">Stops payment processing during window</div></div>'
+      +pill(beOn)+'</div>'
+      +(beOn?'<p style="padding:6px 2px;font-size:11px;color:var(--tx3);margin-top:4px;line-height:1.5">Batch jobs paused. Prevents false failure alerts to customers.</p>':'')
+      +'</div></div>';
+  }
+  return '<div><p class="lbl">Feature toggles</p>'
+    +'<div class="panel"><div class="phd">Front-end &mdash; per feature</div><div class="pb">'+feRows+'</div></div>'
+    +bePanel+'</div>';
+}
+
+function buildBannerPanel(s){
+  var opts='';
+  for(var i=0;i<TMPLS.length;i++)opts+='<option value="'+i+'"'+(ST.banTmpl===i?' selected':'')+'>'+TMPLS[i].scenario+'</option>';
+  var sel='<div class="flbl">Template</div><select id="tmpl-sel" class="sel-in">'+opts+'</select>';
+  if(ST.banLoading)return '<div><p class="lbl">Maintenance banner</p><div class="panel"><div class="phd">Generate banner message</div><div class="gen-loading">Generating with AI&hellip;</div></div></div>';
+  if(!ST.banDone)return '<div><p class="lbl">Maintenance banner</p><div class="panel"><div class="phd">Generate banner message</div><div class="pb">'+sel+'<button class="btn btna" id="bngen" style="width:100%;margin-top:2px">Generate banner</button></div></div></div>';
+  return '<div><p class="lbl">Maintenance banner</p><div class="panel"><div class="phd">Banner copy &mdash; edit as needed</div><div class="pb">'+sel
+    +'<div class="flbl">Title</div><input id="ban-title" class="txt-in" value="'+esc(ST.banTitle)+'"/>'
+    +'<div class="flbl">Body copy</div><textarea id="ban-body" class="ta" rows="7">'+esc(ST.banBody)+'</textarea>'
+    +'<button class="btn bsm" id="bngen">Regenerate</button>'
+    +'</div></div></div>';
+}
+
+function buildS3(s){
+  if(ST.approved)return '<div class="dg">'+okIco()+' Approved by Product Lead at '+fmt(ST.apAt)+'. Click View summary.</div>';
+  if(ST.rejected)return '<div class="dr">'+errIco()+' Rejected &mdash; returned to queue.</div>';
+  var sla=s.sev==='critical'?'Critical &mdash; Product Lead must act within 1 hour':'Major &mdash; Product Lead approval required';
+  return '<p class="lbl">Checker-maker sign-off</p>'
+    +'<div class="abox"><div class="ahd">'+sla+'</div><div style="padding:13px">'
+    +'<div class="r2"><div class="rcd"><div class="rl">Maker</div><div class="rn">Ops Manager</div><div class="ra">&#10003; Submitted</div></div>'
+    +'<div class="rcd"><div class="rl">Checker &mdash; Product Lead</div><div class="rn">Product Lead</div><div class="rp">&#9203; Awaiting approval</div></div></div>'
+    +'<textarea class="nin" id="nin" rows="2" placeholder="Add a note (optional)&hellip;">'+esc(ST.notes)+'</textarea>'
+    +'<div class="arow"><button class="btn btnr" id="brej">Reject</button><button class="btn btna" id="bapp">Approve</button></div>'
+    +'</div></div>';
+}
+
+function buildS4(s){
+  var acts=[];
+  if(s.noImpact){acts.push('No customer impact — acknowledged');}
+  else{
+    var onF=[],offF=[];
+    for(var i=0;i<s.features.length;i++){
+      if(s.features[i].hideFromStep2)continue;
+      if(ST.featToggles[i])onF.push(s.features[i].n);else offF.push(s.features[i].n);
+    }
+    if(onF.length>0)acts.push('Front-end toggled: '+onF.join(', '));
+    if(offF.length>0)acts.push('No change: '+offF.join(', '));
+    if(ST.tBE&&isPay(s))acts.push('Back-end: batch payment jobs paused');
+    if(ST.banDone)acts.push('Maintenance banner generated and approved');
+  }
+  var ar='';for(var i=0;i<acts.length;i++)ar+='<div class="srow"><span class="sv" style="color:var(--ok)">&#10003; '+acts[i]+'</span></div>';
+  var doneBar=ST.approved?'<div class="dg">'+okIco()+' Incident recorded &mdash; '+fmt(ST.apAt)+'</div>':'';
+  var apRows='<div class="srow"><span class="sl">Approved by</span><span class="sv">Product Lead</span></div>'
+    +'<div class="srow"><span class="sl">Status</span><span class="sv" style="color:'+(ST.approved?'var(--ok)':'var(--err)')+'">'+(ST.approved?'Approved':'Rejected')+'</span></div>'
+    +'<div class="srow"><span class="sl">Timestamp</span><span class="sv">'+fmt(ST.apAt)+'</span></div>'
+    +(ST.notes?'<div class="srow"><span class="sl">Notes</span><span class="sv">'+esc(ST.notes)+'</span></div>':'');
+  var banSec=ST.banDone?'<div class="abox" style="margin-top:10px"><div class="ahd">Approved banner copy</div><div style="padding:10px 13px"><div class="srow"><span class="sl">Title</span><span class="sv">'+esc(ST.banTitle)+'</span></div></div><div style="padding:0 13px 13px;font-size:12px;color:var(--tx2);line-height:1.8;white-space:pre-wrap">'+esc(ST.banBody)+'</div></div>':'';
+  return doneBar+'<p class="lbl">Incident summary</p>'
+    +'<div class="abox"><div class="ahd">Event</div><div style="padding:10px 13px">'
+    +'<div class="srow"><span class="sl">System</span><span class="sv">'+s.sys+'</span></div>'
+    +'<div class="srow"><span class="sl">Date</span><span class="sv">'+s.date+'</span></div>'
+    +'<div class="srow"><span class="sl">Window</span><span class="sv">'+s.win+' ('+s.dur+')</span></div>'
+    +'<div class="srow"><span class="sl">Severity</span><span class="sv">'+badge(s.sev)+'</span></div>'
+    +'<div class="srow"><span class="sl">Signal received</span><span class="sv">'+fmt(ST.startAt)+'</span></div>'
+    +'</div></div>'
+    +'<div class="abox" style="margin-top:10px"><div class="ahd">Actions taken</div><div style="padding:10px 13px">'+ar+'</div></div>'
+    +banSec
+    +'<div class="abox" style="margin-top:10px"><div class="ahd">Approval</div><div style="padding:10px 13px">'+apRows+'</div></div>';
+}
+
+async function genBanner(){
+  var s=getSig();var tidx=autoPickTmpl(s);ST.banTmpl=tidx;ST.banLoading=true;go();
+  var tmplList='';for(var i=0;i<TMPLS.length;i++)tmplList+='Index '+i+' ('+TMPLS[i].scenario+'):\nTitle: '+TMPLS[i].title+'\nBody: '+TMPLS[i].body+'\n\n';
+  var dw=parseDateWin(s);
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
+        system:'Select the best maintenance banner template and fill ALL placeholders. Return ONLY valid JSON: {"templateIndex":number,"title":"string","body":"string"}. No markdown.',
+        messages:[{role:'user',content:'Event: '+s.sys+'. Reason: '+s.reason+'. Date: '+dw.dateStr+'. Window: '+dw.timeStr+'. Affected: '+s.features.map(function(f){return f.n;}).join(', ')+'.\n\nTemplates:\n'+tmplList+'Replace [Date: DD-MM] with '+dw.dateStr+' and [Time: HH:MM] with '+dw.timeStr+'. Return JSON only.'}]})
+    });
+    var d=await res.json();
+    var txt=d.content[0].text.trim().replace(/^```[a-z]*\n?/,'').replace(/\n?```$/,'').trim();
+    var r=JSON.parse(txt);
+    ST.banTmpl=typeof r.templateIndex==='number'?r.templateIndex:tidx;
+    ST.banTitle=r.title||TMPLS[tidx].title;
+    ST.banBody=r.body||fillTmpl(TMPLS[tidx],s).body;
+  }catch(e){var f=fillTmpl(TMPLS[tidx],s);ST.banTitle=f.title;ST.banBody=f.body;}
+  ST.banDone=true;ST.banLoading=false;go();
+}
+
+function attachAll(){
+  var items=document.querySelectorAll('.sig-item');
+  for(var i=0;i<items.length;i++){
+    items[i].addEventListener('click',function(){
+      var id=parseInt(this.getAttribute('data-id'));
+      var sig=null;for(var k=0;k<SIGS.length;k++){if(SIGS[k].id===id){sig=SIGS[k];break;}}
+      var ft=[];for(var k=0;k<sig.features.length;k++)ft.push(true);
+      ST={sel:id,step:0,emailOpen:false,featToggles:ft,tBE:true,ack:false,banTmpl:autoPickTmpl(sig),banTitle:'',banBody:'',banDone:false,banLoading:false,notes:'',approved:false,rejected:false,apAt:null,startAt:new Date()};
+      go();
+    });
+  }
+  var tabs=document.querySelectorAll('.stab');
+  for(var i=0;i<tabs.length;i++){tabs[i].addEventListener('click',function(){var t=parseInt(this.getAttribute('data-tab'));if(t<ST.step){ST.step=t;go();}});}
+  function on(id,fn){var el=document.getElementById(id);if(el)el.addEventListener('click',fn);}
+  on('bn',function(){ST.step=Math.min(3,ST.step+1);go();});
+  on('bb',function(){ST.step=Math.max(0,ST.step-1);go();});
+  on('etog',function(){ST.emailOpen=!ST.emailOpen;go();});
+  on('betog',function(){ST.tBE=!ST.tBE;go();});
+  on('btn-ack',function(){ST.ack=true;go();});
+  on('bngen',genBanner);
+  on('bapp',function(){ST.approved=true;ST.apAt=new Date();go();});
+  on('brej',function(){ST.rejected=true;go();});
+  var s=getSig();
+  if(s){
+    for(var i=0;i<s.features.length;i++){
+      (function(idx){var el=document.getElementById('ft-'+idx);if(el)el.addEventListener('click',function(){ST.featToggles[idx]=!ST.featToggles[idx];go();});})(i);
+    }
+  }
+  var nin=document.getElementById('nin');if(nin)nin.addEventListener('input',function(){ST.notes=this.value;});
+  var ts=document.getElementById('tmpl-sel');
+  if(ts)ts.addEventListener('change',function(){ST.banTmpl=parseInt(this.value);if(ST.banDone){var s=getSig();var f=fillTmpl(TMPLS[ST.banTmpl],s);ST.banTitle=f.title;ST.banBody=f.body;go();}});
+  var bt=document.getElementById('ban-title');if(bt)bt.addEventListener('input',function(){ST.banTitle=this.value;});
+  var bb2=document.getElementById('ban-body');if(bb2)bb2.addEventListener('input',function(){ST.banBody=this.value;});
+}
+go();
+</script>

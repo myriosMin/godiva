@@ -546,8 +546,10 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         throw new Error((body as { error?: string }).error ?? "Send failed");
       }
 
-      if (runIdRef.current) {
-        connectToStream(runIdRef.current);
+      const data = await res.json().catch(() => ({})) as { runId?: string };
+      const targetRunId = data.runId ?? runIdRef.current;
+      if (targetRunId) {
+        connectToStream(targetRunId);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Send failed");
@@ -605,8 +607,8 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
           ) : (
             <div className="mx-auto max-w-3xl space-y-2 pb-40">
               {error && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
-                  <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+                <div className="rounded-md border border-red-200 bg-red-50 p-3">
+                  <p className="text-sm text-red-800">{error}</p>
                 </div>
               )}
               <TranscriptRenderer grouped={grouped} />
