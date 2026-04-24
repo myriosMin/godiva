@@ -18,22 +18,29 @@ const TABS = [
 function useRecommendationStream() {
   const { state, dispatch } = useGodiva();
   const abortRef = useRef<AbortController | null>(null);
+  const doneRef = useRef(false);
 
   useEffect(() => {
-    if (state.analysisStatus !== "analyzing" || !state.agentWorkflowRunId) return;
+    if (state.analysisStatus !== "analyzing" || !state.agentWorkflowRunId || !state.agentSessionId) return;
 
     const ctrl = new AbortController();
     abortRef.current = ctrl;
+    doneRef.current = false;
 
-    async function listen() {
+    function finish(recommendation: AgentRecommendation) {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      ctrl.abort();
+      dispatch({ type: "ANALYSIS_DONE", recommendation });
+    }
+
+    // Fast path: SSE stream (catches the event if the connection opens in time)
+    async function listenSSE() {
       try {
         const res = await fetch(`/api/readable/${state.agentWorkflowRunId}`, {
           signal: ctrl.signal,
         });
-        if (!res.ok || !res.body) {
-          dispatch({ type: "ANALYSIS_ERROR" });
-          return;
-        }
+        if (!res.ok || !res.body) return;
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -49,16 +56,9 @@ function useRecommendationStream() {
           for (const line of lines) {
             if (!line.startsWith("data: ")) continue;
             try {
-              const event = JSON.parse(line.slice(6)) as {
-                type: string;
-                payload?: unknown;
-              };
+              const event = JSON.parse(line.slice(6)) as { type: string; payload?: unknown };
               if (event.type === "godiva.recommendation") {
-                dispatch({
-                  type: "ANALYSIS_DONE",
-                  recommendation: event.payload as AgentRecommendation,
-                });
-                ctrl.abort();
+                finish(event.payload as AgentRecommendation);
                 return;
               }
             } catch {
@@ -67,15 +67,38 @@ function useRecommendationStream() {
           }
         }
       } catch (err) {
-        if ((err as Error).name !== "AbortError") {
-          dispatch({ type: "ANALYSIS_ERROR" });
+        if ((err as Error).name === "AbortError") return;
+        // SSE failed — DB polling is the fallback, don't error yet
+      }
+    }
+
+    // Slow path: poll the DB every 5s in case SSE missed the event
+    async function pollDB() {
+      while (!doneRef.current && !ctrl.signal.aborted) {
+        await new Promise((r) => setTimeout(r, 5000));
+        if (doneRef.current || ctrl.signal.aborted) break;
+        try {
+          const res = await fetch(
+            `/api/godiva/incident?sessionId=${encodeURIComponent(state.agentSessionId!)}`,
+            { signal: ctrl.signal },
+          );
+          if (!res.ok) continue;
+          const data = (await res.json()) as { recommendation: AgentRecommendation | null };
+          if (data.recommendation) {
+            finish(data.recommendation);
+            return;
+          }
+        } catch {
+          if (ctrl.signal.aborted) return;
         }
       }
     }
 
-    void listen();
+    void listenSSE();
+    void pollDB();
+
     return () => ctrl.abort();
-  }, [state.analysisStatus, state.agentWorkflowRunId, dispatch]);
+  }, [state.analysisStatus, state.agentWorkflowRunId, state.agentSessionId, dispatch]);
 }
 
 export function WorkflowPanel() {
