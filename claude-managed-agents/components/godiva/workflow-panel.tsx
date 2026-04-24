@@ -240,9 +240,7 @@ export function WorkflowPanel() {
             {state.step === 2 && isDone ? (
               <GButton
                 variant="primary"
-                onClick={() =>
-                  dispatch({ type: "SET_STEP", step: 3 })
-                }
+                onClick={() => dispatch({ type: "NEXT_STEP" })}
               >
                 View summary
               </GButton>
