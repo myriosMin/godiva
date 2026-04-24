@@ -39,8 +39,10 @@ function ClassificationEffect() {
           dispatch({ type: "CLEAR_CLASSIFICATION" });
         }
       })
-      .catch(() => {
-        if (!cancelled) dispatch({ type: "CLEAR_CLASSIFICATION" });
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("[godiva] classification request failed", err);
+        dispatch({ type: "CLEAR_CLASSIFICATION" });
       });
 
     return () => { cancelled = true; };
@@ -52,7 +54,7 @@ function ClassificationEffect() {
 
 export function GodivaPanel() {
   return (
-    <div className="godiva flex h-dvh">
+    <div className="godiva flex h-full min-h-0">
       <ClassificationEffect />
       <SignalSidebar />
       <WorkflowPanel />

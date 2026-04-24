@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
   try {
     const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 400,
       system:
         'Select the best maintenance banner template and fill ALL placeholders. Return ONLY valid JSON: {"templateIndex":number,"title":"string","body":"string"}. No markdown.',

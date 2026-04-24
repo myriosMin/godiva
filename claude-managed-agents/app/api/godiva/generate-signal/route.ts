@@ -10,11 +10,19 @@ function nowSGT() {
   return `${h}:${m}`;
 }
 
+function todaySGT() {
+  const sgt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const day = sgt.getUTCDate();
+  const month = sgt.toLocaleString("en-GB", { month: "short", timeZone: "UTC" });
+  const year = sgt.getUTCFullYear();
+  return `${day} ${month} ${year}`;
+}
+
 const TYPE_GUIDE: Record<string, string> = {
   monitoring_alert:
     "This is a real-time monitoring alert (Datadog or PagerDuty). Set win to 'Ongoing', dur to 'TBD'. The email field should look like a PagerDuty/Datadog alert notification: include alert name, triggered time, affected service, error rate or HTTP status details, and a severity label (P1/P2). Make it terse and technical.",
   maintenance_email:
-    "This is a formal vendor maintenance notice. Pick a maintenance date within the next 3 days from 24 Apr 2026. The email field should be a complete email with From/Subject/Date headers and a formal body announcing the planned downtime window, impact, and contact details.",
+    "This is a formal vendor maintenance notice. Pick a maintenance date within the next 3 days of today. The email field should be a complete email with From/Subject/Date headers and a formal body announcing the planned downtime window, impact, and contact details.",
   manual_trigger:
     "This is an ops team escalation. Set from to ops-team@spgroup.com.sg. The email field should read like a Slack message posted by an on-call engineer: brief, urgent, informal, with a brief description of what they observed.",
 };
@@ -25,7 +33,7 @@ export async function POST(req: Request) {
   const prompt = `You are generating a realistic mock operational signal for SP Group (Singapore utility company) incident management system called Godiva.
 
 Generate a ${signalType} signal for system "${system}" (domain: "${domain}", severity: ${sev}).
-Current SGT time: ${nowSGT()}. Today: 24 Apr 2026.
+Current SGT time: ${nowSGT()}. Today: ${todaySGT()}.
 
 ${TYPE_GUIDE[signalType] ?? ""}
 

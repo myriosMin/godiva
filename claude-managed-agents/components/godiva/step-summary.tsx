@@ -216,20 +216,6 @@ export function StepSummary() {
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gv-ok)" }}>
                 Changes applied successfully
               </span>
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: 9,
-                  fontWeight: 500,
-                  color: "var(--gv-tx3)",
-                  background: "var(--gv-bdr)",
-                  borderRadius: 4,
-                  padding: "2px 6px",
-                  letterSpacing: ".05em",
-                }}
-              >
-                Simulated
-              </span>
             </div>
             <SummaryRow label="Bundle" value={
               <span className="font-mono" style={{ color: "#9b72cf", fontSize: 11 }}>{bundle}</span>
