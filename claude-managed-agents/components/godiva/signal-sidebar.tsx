@@ -265,7 +265,10 @@ export function SignalSidebar() {
                     {state.agentSessionId && (isAnalyzing || isReady) && (
                       <Link
                         href={`/chat/${state.agentSessionId}`}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch({ type: "ANALYSIS_DISMISS" });
+                        }}
                         style={{
                           display: "flex",
                           alignItems: "center",

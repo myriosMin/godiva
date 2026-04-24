@@ -113,7 +113,8 @@ export type GodivaAction =
   | { type: "CONFIRM" }
   | { type: "ANALYSIS_START"; sessionId: string; workflowRunId: string }
   | { type: "ANALYSIS_DONE"; recommendation: AgentRecommendation }
-  | { type: "ANALYSIS_ERROR" };
+  | { type: "ANALYSIS_ERROR" }
+  | { type: "ANALYSIS_DISMISS" };
 
 const workflowDefaults = {
   step: 0 as const,
@@ -313,6 +314,9 @@ function reducer(state: GodivaState, action: GodivaAction): GodivaState {
 
     case "ANALYSIS_ERROR":
       return { ...state, analysisStatus: "error" };
+
+    case "ANALYSIS_DISMISS":
+      return { ...state, analysisStatus: "idle", agentSessionId: null, agentWorkflowRunId: null };
 
     default:
       return state;
