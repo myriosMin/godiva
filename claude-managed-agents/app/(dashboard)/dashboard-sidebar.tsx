@@ -4,9 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArrowRight,
   Ellipsis,
-  LogIn,
   PanelLeft,
   Plus,
   Trash2,
@@ -19,8 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { VercelIcon } from "@/components/icons";
-import { UserMenu } from "@/components/user-menu";
-import { SignInModal } from "@/components/sign-in-modal";
 import { cn } from "@/lib/utils";
 
 interface SessionListItem {
@@ -65,8 +61,6 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [sessionItems, setSessionItems] = useState(initialSessions);
-  const [showSignIn, setShowSignIn] = useState(false);
-
   useEffect(() => {
     setSessionItems(initialSessions);
   }, [initialSessions]);
@@ -203,26 +197,6 @@ export function DashboardSidebar({
         })}
       </div>
 
-      <div className="border-t border-border px-2 py-2">
-        {viewer ? (
-          <UserMenu user={viewer} />
-        ) : (
-          <>
-            <Button
-              variant="ghost"
-              className="w-full justify-between"
-              onClick={() => setShowSignIn(true)}
-            >
-              <span className="flex items-center gap-2">
-                <LogIn className="size-4" />
-                Sign in
-              </span>
-              <ArrowRight className="size-3.5 text-muted-foreground" />
-            </Button>
-            <SignInModal open={showSignIn} onOpenChange={setShowSignIn} />
-          </>
-        )}
-      </div>
     </aside>
   );
 }

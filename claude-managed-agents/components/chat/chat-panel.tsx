@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Check, ChevronRight, Loader2, PanelLeft } from "lucide-react";
+import { ArrowUp, Check, ChevronRight, Loader2 } from "lucide-react";
 import { Streamdown, type Components } from "streamdown";
 import { cn } from "@/lib/utils";
 import { consumePendingMessage } from "@/lib/pending-message";
-import { useSidebar } from "@/lib/sidebar-context";
 import { Button } from "@/components/ui/button";
 
 type TranscriptEvent = {
@@ -401,7 +400,6 @@ function groupEvents(events: TranscriptEvent[]) {
 /* ---------- Main panel ---------- */
 
 export function ChatPanel({ sessionId }: { sessionId: string }) {
-  const sidebar = useSidebar();
   const [pending] = useState(() => consumePendingMessage(sessionId));
   const [events, setEvents] = useState<TranscriptEvent[]>(() => {
     if (!pending) return [];
@@ -579,17 +577,6 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
     <div className="flex h-full min-h-0">
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="flex items-center gap-2 border-b border-border/50 py-3 px-4 md:px-6">
-          {!sidebar.open && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="hidden shrink-0 md:flex"
-              onClick={sidebar.toggle}
-              aria-label="Open sidebar"
-            >
-              <PanelLeft className="size-4" />
-            </Button>
-          )}
           <div className="min-w-0 flex-1">
             {loading ? (
               <div className="h-5 w-48 animate-pulse rounded bg-muted/40" />

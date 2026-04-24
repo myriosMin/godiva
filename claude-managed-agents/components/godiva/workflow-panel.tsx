@@ -1,6 +1,7 @@
 "use client";
 
-import { useGodiva, useCurrentSignal } from "@/components/godiva/godiva-context";
+import { useEffect, useRef } from "react";
+import { useGodiva, useCurrentSignal, type AgentRecommendation } from "@/components/godiva/godiva-context";
 import { StepEventDetails } from "@/components/godiva/step-event-details";
 import { StepWorkflowConfig } from "@/components/godiva/step-workflow-config";
 import { StepApproval } from "@/components/godiva/step-approval";
@@ -13,9 +14,73 @@ const TABS = [
   "4. Summary",
 ];
 
+function useRecommendationStream() {
+  const { state, dispatch } = useGodiva();
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (state.analysisStatus !== "analyzing" || !state.agentWorkflowRunId) return;
+
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+
+    async function listen() {
+      try {
+        const res = await fetch(`/api/readable/${state.agentWorkflowRunId}`, {
+          signal: ctrl.signal,
+        });
+        if (!res.ok || !res.body) {
+          dispatch({ type: "ANALYSIS_ERROR" });
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const event = JSON.parse(line.slice(6)) as {
+                type: string;
+                payload?: unknown;
+              };
+              if (event.type === "godiva.recommendation") {
+                dispatch({
+                  type: "ANALYSIS_DONE",
+                  recommendation: event.payload as AgentRecommendation,
+                });
+                ctrl.abort();
+                return;
+              }
+            } catch {
+              // malformed JSON line — skip
+            }
+          }
+        }
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          dispatch({ type: "ANALYSIS_ERROR" });
+        }
+      }
+    }
+
+    void listen();
+    return () => ctrl.abort();
+  }, [state.analysisStatus, state.agentWorkflowRunId, dispatch]);
+}
+
 export function WorkflowPanel() {
   const { state, dispatch } = useGodiva();
   const sig = useCurrentSignal();
+  useRecommendationStream();
 
   if (!sig) {
     return (

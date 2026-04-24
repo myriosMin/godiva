@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useGodiva, useCurrentSignal } from "@/components/godiva/godiva-context";
 
 function OkIcon() {
@@ -44,7 +45,50 @@ function fmtTime(d: Date | null): string {
 export function StepApproval() {
   const { state, dispatch } = useGodiva();
   const sig = useCurrentSignal();
+  const [acting, setActing] = useState<"approve" | "reject" | null>(null);
   if (!sig) return null;
+
+  async function handleApprove() {
+    if (acting) return;
+    setActing("approve");
+    try {
+      if (state.agentSessionId) {
+        await fetch("/api/godiva/approve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId: state.agentSessionId,
+            approvedBy: "Product Lead",
+            notes: state.notes || undefined,
+          }),
+        });
+      }
+    } finally {
+      setActing(null);
+    }
+    dispatch({ type: "APPROVE" });
+  }
+
+  async function handleReject() {
+    if (acting) return;
+    setActing("reject");
+    try {
+      if (state.agentSessionId) {
+        await fetch("/api/godiva/reject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId: state.agentSessionId,
+            rejectedBy: "Product Lead",
+            notes: state.notes || undefined,
+          }),
+        });
+      }
+    } finally {
+      setActing(null);
+    }
+    dispatch({ type: "REJECT" });
+  }
 
   if (state.approved) {
     return (
@@ -184,38 +228,42 @@ export function StepApproval() {
           {/* Action buttons */}
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <button
-              onClick={() => dispatch({ type: "REJECT" })}
+              onClick={() => void handleReject()}
+              disabled={!!acting}
               style={{
                 padding: "7px 16px",
                 borderRadius: 8,
                 fontSize: 12,
                 fontWeight: 500,
-                cursor: "pointer",
+                cursor: acting ? "default" : "pointer",
                 border: "1px solid rgba(168,64,56,.25)",
                 background: "var(--gv-err-bg)",
-                color: "var(--gv-err)",
+                color: acting === "reject" ? "var(--gv-tx3)" : "var(--gv-err)",
                 fontFamily: "inherit",
                 letterSpacing: ".01em",
+                opacity: acting && acting !== "reject" ? 0.45 : 1,
               }}
             >
-              Reject
+              {acting === "reject" ? "Rejecting…" : "Reject"}
             </button>
             <button
-              onClick={() => dispatch({ type: "APPROVE" })}
+              onClick={() => void handleApprove()}
+              disabled={!!acting}
               style={{
                 padding: "7px 16px",
                 borderRadius: 8,
                 fontSize: 12,
                 fontWeight: 500,
-                cursor: "pointer",
+                cursor: acting ? "default" : "pointer",
                 border: "1px solid var(--gv-acc)",
-                background: "var(--gv-acc)",
-                color: "var(--gv-card)",
+                background: acting === "approve" ? "var(--gv-acc-bg)" : "var(--gv-acc)",
+                color: acting === "approve" ? "var(--gv-tx3)" : "var(--gv-card)",
                 fontFamily: "inherit",
                 letterSpacing: ".01em",
+                opacity: acting && acting !== "approve" ? 0.45 : 1,
               }}
             >
-              Approve
+              {acting === "approve" ? "Approving…" : "Approve"}
             </button>
           </div>
         </div>

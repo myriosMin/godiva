@@ -1,22 +1,42 @@
 {
+  "godiva-approval-matrix": {
+    "skillId": "skill_019AWJPWLT94bxZMJanpP3iP",
+    "latestVersion": "1777008055483558",
+    "displayTitle": "godiva-approval-matrix"
+  },
+  "godiva-banner-templates": {
+    "skillId": "skill_01UzSLFrLBQVwwfQXghGh5yR",
+    "latestVersion": "1777008056835763",
+    "displayTitle": "godiva-banner-templates"
+  },
+  "godiva-escalation-contacts": {
+    "skillId": "skill_017k1BCphMEZjZCL7QR1BN2g",
+    "latestVersion": "1777008058158277",
+    "displayTitle": "godiva-escalation-contacts"
+  },
   "godiva-ld-reference": {
     "skillId": "skill_01AN45nKTy6pXMvzg5ZZn6rX",
-    "latestVersion": "1777006058399066",
+    "latestVersion": "1777008059504940",
     "displayTitle": "godiva-ld-reference"
   },
   "godiva-severity-rules": {
     "skillId": "skill_01MrPrLnoK2pnkJTwVfp718B",
-    "latestVersion": "1777006059768669",
+    "latestVersion": "1777008060878099",
     "displayTitle": "godiva-severity-rules"
   },
   "godiva-signal-schema": {
     "skillId": "skill_01XzKU7Mownk62kaBtiqmYm3",
-    "latestVersion": "1777006061231884",
+    "latestVersion": "1777008062290093",
     "displayTitle": "godiva-signal-schema"
   },
   "godiva-sop-playbook": {
     "skillId": "skill_019CdC37i1WTctNWBJRx6UcP",
-    "latestVersion": "1777006062595882",
+    "latestVersion": "1777008063651159",
     "displayTitle": "godiva-sop-playbook"
+  },
+  "godiva-vendor-status-urls": {
+    "skillId": "skill_01V3Cd1n5oynbV6FMebMSqfC",
+    "latestVersion": "1777008065444232",
+    "displayTitle": "godiva-vendor-status-urls"
   }
 }

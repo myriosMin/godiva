@@ -1,5 +1,6 @@
 import {
   boolean,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -72,6 +73,21 @@ export const managedAgentSession = pgTable("managed_agent_session", {
   repoOwner: text("repo_owner"),
   repoName: text("repo_name"),
   baseBranch: text("base_branch"),
+});
+
+export const godivaIncident = pgTable("godiva_incident", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  anthropicSessionId: text("anthropic_session_id").notNull(),
+  signalData: jsonb("signal_data"),
+  recommendation: jsonb("recommendation"),
+  approvalStatus: text("approval_status").notNull().default("pending"),
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  operatorNotes: text("operator_notes"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const mcpOAuthClient = pgTable("mcp_oauth_client", {

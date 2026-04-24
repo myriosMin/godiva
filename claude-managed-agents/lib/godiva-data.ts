@@ -19,6 +19,8 @@ export interface Signal {
   noImpact: boolean;
   features: Feature[];
   email: string;
+  signalType?: "maintenance_email" | "monitoring_alert" | "manual_trigger";
+  isNew?: boolean;
 }
 
 export interface BannerTemplate {
@@ -39,6 +41,21 @@ const PAY = [
   "debit card",
   "card payment",
 ];
+
+export function deriveBundleFromDomain(domain: string): string {
+  switch (domain.toLowerCase()) {
+    case "payment": return "PAYMENT_OUTAGE";
+    case "core": return "CORE_OUTAGE";
+    case "channel": return "CHANNEL_OUTAGE";
+    case "support": return "SUPPORT_DEGRADED";
+    case "ev": return "INF_EV_OUTAGE";
+    case "content": return "INF_BANNER_MAINT";
+    case "mytengah": return "TEN_FULL_OUTAGE";
+    case "infrastructure": return "INF_TKG_OUTAGE";
+    case "cross": return "INF_FULL_OUTAGE";
+    default: return "SERVICE_OUTAGE";
+  }
+}
 
 export function isPay(s: Signal): boolean {
   const t = (s.domain + " " + s.sys + " " + s.reason).toLowerCase();

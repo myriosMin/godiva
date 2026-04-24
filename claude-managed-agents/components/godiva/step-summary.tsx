@@ -2,7 +2,7 @@
 
 import { useGodiva, useCurrentSignal } from "@/components/godiva/godiva-context";
 import { SeverityBadge } from "@/components/godiva/severity-badge";
-import { isPay } from "@/lib/godiva-data";
+import { isPay, deriveBundleFromDomain } from "@/lib/godiva-data";
 
 function OkIcon() {
   return (
@@ -29,7 +29,7 @@ function fmtTime(d: Date | null): string {
 }
 
 export function StepSummary() {
-  const { state } = useGodiva();
+  const { state, dispatch } = useGodiva();
   const sig = useCurrentSignal();
   if (!sig) return null;
 
@@ -168,6 +168,80 @@ export function StepSummary() {
           <SummaryRow label="Notes" value={state.notes} last />
         )}
       </ABox>
+
+      {/* Track 1 execution */}
+      {state.approved && !state.confirmed && (
+        <button
+          onClick={() => dispatch({ type: "CONFIRM" })}
+          style={{
+            width: "100%",
+            marginTop: 10,
+            padding: "10px 0",
+            borderRadius: 10,
+            border: "none",
+            background: "var(--gv-ok)",
+            color: "#fff",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            letterSpacing: ".02em",
+          }}
+        >
+          Confirm &amp; Apply Bundle
+        </button>
+      )}
+
+      {state.confirmed && (() => {
+        const bundle =
+          state.agentClassification?.bundle ??
+          deriveBundleFromDomain(sig.domain);
+        const flagCount = state.featToggles.filter(Boolean).length;
+        const d = state.confirmedAt ?? new Date();
+        const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+        const rand = String(d.getMilliseconds() + d.getSeconds() * 1000).padStart(4, "0").slice(0, 4);
+        const eventId = `EVT-${ymd}-${rand}`;
+
+        return (
+          <ABox header="Bundle Applied" style={{ marginTop: 10, borderColor: "rgba(74,107,80,.35)" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 0 12px",
+                borderBottom: "1px solid var(--gv-bdr)",
+              }}
+            >
+              <OkIcon />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gv-ok)" }}>
+                Changes applied successfully
+              </span>
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: 9,
+                  fontWeight: 500,
+                  color: "var(--gv-tx3)",
+                  background: "var(--gv-bdr)",
+                  borderRadius: 4,
+                  padding: "2px 6px",
+                  letterSpacing: ".05em",
+                }}
+              >
+                Simulated
+              </span>
+            </div>
+            <SummaryRow label="Bundle" value={
+              <span className="font-mono" style={{ color: "#9b72cf", fontSize: 11 }}>{bundle}</span>
+            } />
+            <SummaryRow label="Features toggled" value={`${flagCount} flag${flagCount !== 1 ? "s" : ""}`} />
+            <SummaryRow label="Service Event ID" value={
+              <span className="font-mono" style={{ fontSize: 11 }}>{eventId}</span>
+            } />
+            <SummaryRow label="Applied at" value={fmtTime(state.confirmedAt)} last />
+          </ABox>
+        );
+      })()}
     </div>
   );
 }

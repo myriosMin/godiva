@@ -13,10 +13,42 @@ import {
   autoPickTmpl,
   fillTmpl,
   type Signal,
+  type Feature,
   type BannerTemplate,
 } from "@/lib/godiva-data";
 
+export interface AgentClassification {
+  sys: string;
+  reason: string;
+  sev: "critical" | "major" | "minor";
+  domain: string;
+  bundle: string;
+  features: Feature[];
+  noImpact: boolean;
+  confidence: "high" | "medium" | "low";
+  win: string;
+  dur: string;
+}
+
+export interface AgentRecommendation {
+  severity: "critical" | "major" | "minor";
+  domain: string;
+  bundle: string;
+  affected_features: Array<{ name: string; impact: string }>;
+  banner_title: string;
+  banner_body: string;
+  approvers_required: string[];
+  blast_radius: "low" | "medium" | "high" | "extremely_high";
+  confidence: "high" | "medium" | "low";
+  sop_steps: string[];
+  maintenance_start?: string;
+  maintenance_end?: string;
+  notes?: string;
+}
+
 export interface GodivaState {
+  signals: Signal[];
+  demoMode: boolean;
   selectedSignalId: number | null;
   step: 0 | 1 | 2 | 3;
   emailOpen: boolean;
@@ -33,9 +65,21 @@ export interface GodivaState {
   rejected: boolean;
   approvedAt: Date | null;
   startedAt: Date | null;
+  agentClassification: AgentClassification | null;
+  classifying: boolean;
+  confirmed: boolean;
+  confirmedAt: Date | null;
+  // Agent session wiring
+  agentSessionId: string | null;
+  agentWorkflowRunId: string | null;
+  analysisStatus: "idle" | "analyzing" | "ready" | "error";
+  recommendation: AgentRecommendation | null;
 }
 
 export type GodivaAction =
+  | { type: "ADD_SIGNAL"; signal: Signal }
+  | { type: "MARK_SIGNAL_SEEN"; signalId: number }
+  | { type: "SET_DEMO_MODE"; on: boolean }
   | { type: "SELECT_SIGNAL"; signalId: number }
   | { type: "NEXT_STEP" }
   | { type: "PREV_STEP" }
@@ -62,11 +106,17 @@ export type GodivaAction =
   | { type: "SET_BANNER_BODY"; body: string }
   | { type: "SET_NOTES"; notes: string }
   | { type: "APPROVE" }
-  | { type: "REJECT" };
+  | { type: "REJECT" }
+  | { type: "SET_CLASSIFYING" }
+  | { type: "SET_CLASSIFICATION"; classification: AgentClassification }
+  | { type: "CLEAR_CLASSIFICATION" }
+  | { type: "CONFIRM" }
+  | { type: "ANALYSIS_START"; sessionId: string; workflowRunId: string }
+  | { type: "ANALYSIS_DONE"; recommendation: AgentRecommendation }
+  | { type: "ANALYSIS_ERROR" };
 
-const initialState: GodivaState = {
-  selectedSignalId: null,
-  step: 0,
+const workflowDefaults = {
+  step: 0 as const,
   emailOpen: false,
   featToggles: [],
   toggleBackend: true,
@@ -81,30 +131,59 @@ const initialState: GodivaState = {
   rejected: false,
   approvedAt: null,
   startedAt: null,
+  agentClassification: null,
+  classifying: false,
+  confirmed: false,
+  confirmedAt: null,
+  agentSessionId: null,
+  agentWorkflowRunId: null,
+  analysisStatus: "idle" as const,
+  recommendation: null,
 };
 
-function getSignal(id: number | null): Signal | null {
-  if (id === null) return null;
-  return SIGS.find((s) => s.id === id) ?? null;
-}
+const initialState: GodivaState = {
+  signals: SIGS,
+  demoMode: false,
+  selectedSignalId: null,
+  ...workflowDefaults,
+};
 
 function reducer(state: GodivaState, action: GodivaAction): GodivaState {
   switch (action.type) {
+    case "ADD_SIGNAL":
+      return { ...state, signals: [action.signal, ...state.signals] };
+
+    case "MARK_SIGNAL_SEEN":
+      return {
+        ...state,
+        signals: state.signals.map((s) =>
+          s.id === action.signalId ? { ...s, isNew: false } : s
+        ),
+      };
+
+    case "SET_DEMO_MODE":
+      return { ...state, demoMode: action.on };
+
     case "SELECT_SIGNAL": {
-      const sig = getSignal(action.signalId);
+      const sig = state.signals.find((s) => s.id === action.signalId);
       if (!sig) return state;
       const tmplIdx = autoPickTmpl(sig);
       return {
-        ...initialState,
+        ...state,
+        ...workflowDefaults,
         selectedSignalId: action.signalId,
         featToggles: sig.features.map(() => true),
         bannerTemplateIndex: tmplIdx,
         startedAt: new Date(),
+        agentSessionId: null,
+        agentWorkflowRunId: null,
+        analysisStatus: "idle",
+        recommendation: null,
       };
     }
 
     case "NEXT_STEP": {
-      const sig = getSignal(state.selectedSignalId);
+      const sig = state.signals.find((s) => s.id === state.selectedSignalId);
       if (state.step === 1 && sig?.noImpact && !state.ackNoImpact) return state;
       if (state.step >= 3) return state;
       return { ...state, step: (state.step + 1) as 0 | 1 | 2 | 3 };
@@ -138,7 +217,7 @@ function reducer(state: GodivaState, action: GodivaAction): GodivaState {
     case "SET_BANNER_TEMPLATE": {
       const newState = { ...state, bannerTemplateIndex: action.index };
       if (state.bannerDone) {
-        const sig = getSignal(state.selectedSignalId);
+        const sig = state.signals.find((s) => s.id === state.selectedSignalId);
         const tmpl = TMPLS[action.index];
         if (sig && tmpl) {
           const filled = fillTmpl(tmpl, sig);
@@ -187,6 +266,48 @@ function reducer(state: GodivaState, action: GodivaAction): GodivaState {
     case "REJECT":
       return { ...state, rejected: true };
 
+    case "SET_CLASSIFYING":
+      return { ...state, classifying: true, agentClassification: null };
+
+    case "SET_CLASSIFICATION":
+      return { ...state, classifying: false, agentClassification: action.classification };
+
+    case "CLEAR_CLASSIFICATION":
+      return { ...state, classifying: false, agentClassification: null };
+
+    case "CONFIRM":
+      return { ...state, confirmed: true, confirmedAt: new Date() };
+
+    case "ANALYSIS_START":
+      return {
+        ...state,
+        analysisStatus: "analyzing",
+        agentSessionId: action.sessionId,
+        agentWorkflowRunId: action.workflowRunId,
+        recommendation: null,
+      };
+
+    case "ANALYSIS_DONE": {
+      const rec = action.recommendation;
+      // Map agent's affected_features back to featToggles (all on by default)
+      const currentSig = state.signals.find((s) => s.id === state.selectedSignalId);
+      const featToggles = currentSig
+        ? currentSig.features.map(() => true)
+        : rec.affected_features.map(() => true);
+      return {
+        ...state,
+        analysisStatus: "ready",
+        recommendation: rec,
+        bannerTitle: rec.banner_title,
+        bannerBody: rec.banner_body,
+        bannerDone: true,
+        featToggles,
+      };
+    }
+
+    case "ANALYSIS_ERROR":
+      return { ...state, analysisStatus: "error" };
+
     default:
       return state;
   }
@@ -204,7 +325,9 @@ const GodivaContext = createContext<GodivaContextValue | null>(null);
 export function GodivaProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <GodivaContext value={{ state, dispatch, signals: SIGS, templates: TMPLS }}>
+    <GodivaContext
+      value={{ state, dispatch, signals: state.signals, templates: TMPLS }}
+    >
       {children}
     </GodivaContext>
   );
@@ -218,5 +341,5 @@ export function useGodiva(): GodivaContextValue {
 
 export function useCurrentSignal(): Signal | null {
   const { state } = useGodiva();
-  return getSignal(state.selectedSignalId);
+  return state.signals.find((s) => s.id === state.selectedSignalId) ?? null;
 }

@@ -159,6 +159,37 @@
   --gv-minor-tx: #283818;
 }
 
+@keyframes signal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.signal-new {
+  animation: signal-slide-in 0.25s ease-out;
+  will-change: transform, opacity;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4caf72;
+  animation: live-pulse 1.4s ease-in-out infinite;
+  will-change: opacity;
+}
+
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -181,4 +212,13 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.skeleton-pulse {
+  animation: skeleton-fade 1.4s ease-in-out infinite;
 }
